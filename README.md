@@ -5,6 +5,7 @@ O sistema foi projetado para gerenciar pedidos recebidos de um Produto Externo A
 ## Pré-requisitos
 - Docker
 - Docker Compose  orderProcessor
+- Kind
 
 ## Estrutura de Pastas do Projeto
 order/
@@ -35,29 +36,30 @@ order/
 │   │   │       └── ProcessorApplication.java
 │   │   └── resources
 │   │       └── application.properties
-│   └── src.test
-│       ├── java
-│       │   └── br.com.atocf.order.processor
-│       │       ├── dto
-│       │       │   └── OrderRequestTests.java
-│       │       ├── exception
-│       │       │   ├── DuplicateOrderExceptionTests.java
-│       │       │   └── OrderNotFoundExceptionTest.java
-│       │       ├── model
-│       │       │   ├── CustomerTests.java
-│       │       │   ├── OrderTests.java
-│       │       │   ├── OrderStatusTests.java
-│       │       │   └── ProductTests.java
-│       │       ├── repository
-│       │       │   └── OrderRepositoryTests.java
-│       │       ├── service
-│       │       │   └── OrderConsumerTests.java
-│       │       ├── util
-│       │       │   └── DateUtilsTests.java
-│       │       └── ProcessorApplication.java
-│       └── resources
-│           └── application-test.properties
-│
+│   ├── src.test
+│   │   ├── java
+│   │   │   └── br.com.atocf.order.processor
+│   │   │       ├── dto
+│   │   │       │   └── OrderRequestTests.java
+│   │   │       ├── exception
+│   │   │       │   ├── DuplicateOrderExceptionTests.java
+│   │   │       │   └── OrderNotFoundExceptionTest.java
+│   │   │       ├── model
+│   │   │       │   ├── CustomerTests.java
+│   │   │       │   ├── OrderTests.java
+│   │   │       │   ├── OrderStatusTests.java
+│   │   │       │   └── ProductTests.java
+│   │   │       ├── repository
+│   │   │       │   └── OrderRepositoryTests.java
+│   │   │       ├── service
+│   │   │       │   └── OrderConsumerTests.java
+│   │   │       ├── util
+│   │   │       │   └── DateUtilsTests.java
+│   │   │       └── ProcessorApplication.java
+│   │   └── resources
+│   │       └── application-test.properties
+│   └── Dockerfile
+│      
 ├── orderQuery/
 │
 ├── compose.yaml
@@ -110,12 +112,38 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 
 ## Execução
 
-### Inicie o ambiente local:
+### Build dos serviços:
 ```shell
-   docker-compose up -d
+   docker-compose build
 ```
 
-### Para parar o ambiente:
-```shell   
-  docker-compose down
+### Crie o cluster:
+```shell
+   kind create cluster --config kind-cluster.yaml
+```
+
+### Verifique se o cluster foi criado:
+```shell
+   kubectl get nodes
+```
+
+### Deploy dos serviços:
+```shell
+   kubectl apply -f mongodb-deployment.yaml
+```   
+```shell
+   kubectl apply -f rabbitmq-deployment.yaml
+```
+```shell
+   kubectl apply -f order-deployment.yaml
+```
+
+### Verifique se os pods foram criados:
+```shell
+   kubectl get pods
+```
+
+### Verifique os serviços:
+```shell
+   kubectl get services
 ```

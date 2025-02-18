@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   mongodb:
-    image: 'mongo:latest'
+    image: mongo:latest
     container_name: mongodb
     ports:
       - '27017:27017'
@@ -10,16 +10,48 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: inicial1234
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5672:5672"      # Porta para mensagens (AMQP)
+      - "15672:15672"    # Porta para interface de gerenciamento
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: inicial1234
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  order-processor:
+    build:
+      context: ./orderProcessor
+      dockerfile: Dockerfile
+    image: order-processor:latest
+    container_name: order-processor
+    ports:
+      - "8090:8090"
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      SPRING_DATA_MONGODB_HOST: mongodb
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_USERNAME: admin
+      SPRING_DATA_MONGODB_PASSWORD: inicial1234
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: inicial1234
+    depends_on:
+      - mongodb
+      - rabbitmq
 
 volumes:
   mongo-data:
