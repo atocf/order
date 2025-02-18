@@ -7,6 +7,7 @@ import br.com.atocf.order.processor.model.Order;
 import br.com.atocf.order.processor.model.OrderStatus;
 import br.com.atocf.order.processor.repository.OrderRepository;
 import br.com.atocf.order.processor.util.DateUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class OrderConsumer {
     }
 
     @RabbitListener(queues = "#{rabbitMQConfig.queueName}")
-    public void consumeOrderMessage(String message) {
+    public void consumeOrderMessage(String message) throws JsonProcessingException {
         try {
             logger.info("Mensagem recebida da fila '{}': {}", rabbitMQConfig.getQueueName(), message);
 
@@ -44,6 +45,7 @@ public class OrderConsumer {
 
         } catch (Exception e) {
             logger.error("Erro ao processar mensagem da fila '{}': {}", rabbitMQConfig.getQueueName(), e.getMessage(), e);
+            throw e;
         }
     }
 

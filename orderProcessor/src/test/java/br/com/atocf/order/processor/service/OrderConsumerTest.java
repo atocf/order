@@ -22,6 +22,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,7 +54,58 @@ class OrderConsumerTest {
 
     @Test
     void testConsumeOrderMessageSuccessfully() throws Exception {
-        // Mensagem recebida do produto externo A (payload do pedido)
+        String message = """
+            {
+                "orderId": "ORD123456",
+                "customer": {
+                    "id": "CUST001",
+                    "name": "Maria Silva"
+                },
+                "products": [
+                    {
+                        "productId": "PROD001",
+                        "name": "Teclado Gamer",
+                        "quantity": 1,
+                        "unitPrice": 250.0
+                    },
+                    {
+                        "productId": "PROD002",
+                        "name": "Mouse Gamer",
+                        "quantity": 2,
+                        "unitPrice": 120.0
+                    }
+                ],
+                "createdAt": "2025-02-18T01:26:07Z"
+            }
+        """;
+
+        OrderRequest orderRequest = new OrderRequest();
+        orderRequest.setOrderId("ORD123456");
+        orderRequest.setCreatedAt("2025-02-18T01:26:07Z");
+        orderRequest.setCustomer(new Customer());
+        orderRequest.setProducts(Arrays.asList(
+                new Product("PROD001", "Teclado Gamer", 1, 250.0),
+                new Product("PROD002", "Mouse Gamer", 2, 120.0)
+        ));
+        when(objectMapper.readValue(message, OrderRequest.class)).thenReturn(orderRequest);
+
+        when(orderRepository.existsByOrderId("ORD123456")).thenReturn(false);
+
+        orderConsumer.consumeOrderMessage(message);
+
+        verify(orderRepository, times(1)).existsByOrderId("ORD123456");
+        verify(orderRepository, times(2)).save(orderCaptor.capture()); // O pedido será salvo duas vezes
+
+        Order savedOrder = orderCaptor.getAllValues().get(0);
+        assertEquals("ORD123456", savedOrder.getOrderId(), "O ID do pedido deve ser 'ORD123456'");
+        assertEquals(DateUtils.convertStringToDate("2025-02-18T01:26:07Z"), savedOrder.getCreatedAt());
+        assertNotNull(savedOrder.getEntryAt(), "A data de entrada deve ser preenchida");
+        assertEquals(490.0, savedOrder.getTotalValue(), "O valor total deve ser 490.0 (250.0 + 2 * 120.0)");
+        assertEquals(OrderStatus.CALCULATED, savedOrder.getStatus(), "O status final deve ser 'CALCULATED'");
+    }
+
+    @Test
+    void testConsumeOrderMessageDuplicateOrder() throws Exception {
         String message = """
         {
             "orderId": "ORD123456",
@@ -67,45 +119,30 @@ class OrderConsumerTest {
                     "name": "Teclado Gamer",
                     "quantity": 1,
                     "unitPrice": 250.0
-                },
-                {
-                    "productId": "PROD002",
-                    "name": "Mouse Gamer",
-                    "quantity": 2,
-                    "unitPrice": 120.0
                 }
             ],
             "createdAt": "2025-02-18T01:26:07Z"
         }
-    """;
+        """;
 
-        // Configuração do mock para deserializar a mensagem em OrderRequest
         OrderRequest orderRequest = new OrderRequest();
         orderRequest.setOrderId("ORD123456");
         orderRequest.setCreatedAt("2025-02-18T01:26:07Z");
         orderRequest.setCustomer(new Customer());
         orderRequest.setProducts(Arrays.asList(
-                new Product("PROD001", "Teclado Gamer", 1, 250.0),
-                new Product("PROD002", "Mouse Gamer", 2, 120.0)
+                new Product("PROD001", "Teclado Gamer", 1, 250.0)
         ));
         when(objectMapper.readValue(message, OrderRequest.class)).thenReturn(orderRequest);
 
-        // Configuração do mock para o repositório
-        when(orderRepository.existsByOrderId("ORD123456")).thenReturn(false);
+        when(orderRepository.existsByOrderId("ORD123456")).thenReturn(true);
 
-        // Executa o consumidor para processar a mensagem
-        orderConsumer.consumeOrderMessage(message);
+        Exception exception = assertThrows(
+                Exception.class,
+                () -> orderConsumer.consumeOrderMessage(message)
+        );
 
-        // Verifica se o pedido foi salvo corretamente no repositório
+        assertEquals("Pedido duplicado detectado: ORD123456", exception.getMessage());
         verify(orderRepository, times(1)).existsByOrderId("ORD123456");
-        verify(orderRepository, times(2)).save(orderCaptor.capture()); // O pedido será salvo duas vezes
-
-        // Verifica os dados do pedido salvo na primeira chamada
-        Order savedOrder = orderCaptor.getAllValues().get(0);
-        assertEquals("ORD123456", savedOrder.getOrderId(), "O ID do pedido deve ser 'ORD123456'");
-        assertEquals(DateUtils.convertStringToDate("2025-02-18T01:26:07Z"), savedOrder.getCreatedAt());
-        assertNotNull(savedOrder.getEntryAt(), "A data de entrada deve ser preenchida");
-        assertEquals(490.0, savedOrder.getTotalValue(), "O valor total deve ser 490.0 (250.0 + 2 * 120.0)");
-        assertEquals(OrderStatus.CALCULATED, savedOrder.getStatus(), "O status final deve ser 'CALCULATED'");
+        verify(orderRepository, times(0)).save(orderCaptor.capture());
     }
 }

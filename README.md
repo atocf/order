@@ -1,52 +1,62 @@
-# order
+# Order
 
 ## Pré-requisitos
-
 - Docker
-- Docker Compose
+- Docker Compose  orderProcessor
 
 ## Estrutura de Pastas do Projeto
 order/
-│
-│   ├── /src.main
+│   
+├── orderProcessor/
+│   ├── src.main
 │   │   ├── java
-│   │   │   └── br.com.atocf.order.processor
+│   │   │  └── br.com.atocf.order.processor
 │   │   │       ├── config
 │   │   │       │   ├── MongoConfig.java
 │   │   │       │   └── RabbitMQConfig.java
 │   │   │       ├── dto
 │   │   │       │   └── OrderRequest.java
+│   │   │       ├── exception
+│   │   │       │   ├── DuplicateOrderException.java
+│   │   │       │   └── OrderNotFoundException.java
 │   │   │       ├── model
-│   │   │       │   ├── Order.java
 │   │   │       │   ├── Customer.java
-│   │   │       │   ├── Product.java
-│   │   │       │   └── OrderStatus.java
+│   │   │       │   ├── Order.java
+│   │   │       │   ├── OrderStatus.java
+│   │   │       │   └── Product.java
 │   │   │       ├── repository
 │   │   │       │   └── OrderRepository.java
 │   │   │       ├── service
-│   │   │       │   ├── OrderConsumer.java
-│   │   │       │   └── DuplicateOrderHandler.java
-│   │   │       ├── exception
-│   │   │       │   ├── DuplicateOrderException.java
-│   │   │       │   └── GlobalExceptionHandler.java
-│   │   │       └── OrderProcessorApplication.java
+│   │   │       │   └── OrderConsumer.java
+│   │   │       ├── util
+│   │   │       │   └── DateUtils.java
+│   │   │       └── ProcessorApplication.java
 │   │   └── resources
-│   │       ├── application.properties
-│   │       └── application-test.properties
-│   └── /src.test
+│   │       └── application.properties
+│   └── src.test
 │       ├── java
-│       │   └── br.com.atocf.orderprocessor
-│       │       ├── service
-│       │       │   ├── OrderConsumerTests.java
-│       │       │   └── DuplicateOrderHandlerTests.java
+│       │   └── br.com.atocf.order.processor
+│       │       ├── dto
+│       │       │   └── OrderRequestTests.java
+│       │       ├── exception
+│       │       │   ├── DuplicateOrderExceptionTests.java
+│       │       │   └── OrderNotFoundExceptionTest.java
+│       │       ├── model
+│       │       │   ├── CustomerTests.java
+│       │       │   ├── OrderTests.java
+│       │       │   ├── OrderStatusTests.java
+│       │       │   └── ProductTests.java
 │       │       ├── repository
 │       │       │   └── OrderRepositoryTests.java
-│       │       └── exception
-│       │           └── DuplicateOrderExceptionTests.java
+│       │       ├── service
+│       │       │   └── OrderConsumerTests.java
+│       │       ├── util
+│       │       │   └── DateUtilsTests.java
+│       │       └── ProcessorApplication.java
 │       └── resources
 │           └── application-test.properties
-│   
-├── orderQuery
+│
+├── orderQuery/
 │
 ├── compose.yaml
 └── README.md
@@ -55,40 +65,6 @@ order/
 
 
 
-
-
-
-
-
-
-
-order/
-│
-
-│   │       ├── controller
-│   │       │   └── OrderController.java
-│   │       ├── model
-│   │       │   ├── OrderRequest.java
-│   │       │   └── OrderResponse.java
-│   │       ├── exception
-│   │       │   ├── OrderNotFoundException.java
-│   │       │   ├── DuplicateOrderException.java
-│   │       │   └── GlobalExceptionHandler.java
-│   │       ├── model
-│   │       │   ├── Customer.java
-│   │       │   ├── Order.java
-│   │       │   ├── OrderStatus.java
-│   │       │   └── Product.java
-│   │       ├── repository
-│   │       │   └── OrderRepository.java
-│   │       ├── service
-│   │       │   ├── OrderConsumer.java
-│   │       │   └── OrderService.java
-│   │       ├── util
-│   │       │   └── DateUtil.java
-│   │       └── OrderApplication.java
-│   └── resources
-│       └── application.properties
 ├── /src.test
 │   ├──java
 │   │   └── br.com.atocf.order
