@@ -145,24 +145,60 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 ```shell
    kubectl get services
 ```
-- Acessar o RabbitMQ:
+
+### Acessar o RabbitMQ:
+- Acesse o RabbitMQ no navegador:
 ```shell
    kubectl port-forward service/rabbitmq-service 15672:15672
 ```
+- Usuário: admin
+- Senha: inicial1234
+```shell
+   http://localhost:15672
+```
+- Acesse o RabbitMQ no terminal e liberar para teste de carga:
+```shell
+   kubectl port-forward service/rabbitmq-service 5672:5672
+```
+- Teste de carga
+```shell
+  pip install pika
+```
+```shell
+python testeCarga.py
+```
+- Modelo de dados 
+```
+{
+  "orderId": "ORD123456",
+  "customer": {
+    "id": "CUST001",
+    "name": "Maria Silva"
+  },
+  "products": [
+    {
+      "productId": "PROD001",
+      "name": "Teclado Gamer",
+      "quantity": 1,
+      "unitPrice": 250.0
+    },
+    {
+      "productId": "PROD002",
+      "name": "Mouse Gamer",
+      "quantity": 2,
+      "unitPrice": 120.0
+    }
+  ],
+  "createdAt": "2025-02-18T01:26:07Z"
+}
+```
 
-
-
-
-
-
-
-
-## Acessar o MongoDB:
+### Acessar o MongoDB:
 ```shell
    kubectl port-forward service/mongodb-service 27017:27017
 ```
 
-## Conectar ao MongoDB:
+- Conectar ao MongoDB:
 ```shell
    mongosh --host localhost --port 27017 -u admin -p inicial1234 order
 ```
@@ -176,4 +212,12 @@ db.orders.aggregate([
 { $group: { _id: "$orderId", count: { $sum: 1 } } },
 { $match: { count: { $gt: 1 } } }
 ])
+```
+- Consultar qtd de pedido:
+```shell
+db.orders.countDocuments();
+```
+- Limpar pedidos:
+```shell
+db.orders.deleteMany({});
 ```
