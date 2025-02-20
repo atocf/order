@@ -7,7 +7,6 @@ data:
   prometheus.yml: |
     global:
       scrape_interval: 15s
-
     scrape_configs:
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
@@ -25,3 +24,19 @@ data:
             target_label: __address__
             regex: (.+):(.+)
             replacement: $1:$2
+      - job_name: 'order-processor'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['order-processor-service:8090']
+      - job_name: 'rabbitmq'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['rabbitmq-service:15672']
+      - job_name: 'redis'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['redis:6379']
+      - job_name: 'mongodb'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['mongodb-service:27017']
