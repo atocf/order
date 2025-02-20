@@ -86,6 +86,11 @@
 			<artifactId>spring-boot-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- Dependência para MongoDB embutido nos testes -->
 		<dependency>
 			<groupId>de.flapdoodle.embed</groupId>
