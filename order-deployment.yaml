@@ -38,6 +38,10 @@ spec:
               value: admin
             - name: SPRING_RABBITMQ_PASSWORD
               value: inicial1234
+            - name: SPRING_REDIS_HOST
+              value: redis-service
+            - name: SPRING_REDIS_PORT
+              value: "6379"
           resources:
             requests:
               memory: "512Mi"
@@ -56,6 +60,12 @@ spec:
               path: /actuator/health
               port: 8090
             initialDelaySeconds: 30
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8090
+            failureThreshold: 30
             periodSeconds: 10
 ---
 apiVersion: v1

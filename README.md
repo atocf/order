@@ -72,6 +72,7 @@ order/
 ├── prometheus-deployment.yaml
 ├── rabbitmq-deployment.yaml
 ├── testeCarga.py
+├── redis-deployment.yaml
 └── README.md
 
 ## Serviço
@@ -154,6 +155,9 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 ```
 ```shell
    kubectl apply -f prometheus-deployment.yaml
+```
+```shell
+  kubectl apply -f redis-deployment.yaml
 ```
 - Verifique se os pods foram criados:
 ```shell

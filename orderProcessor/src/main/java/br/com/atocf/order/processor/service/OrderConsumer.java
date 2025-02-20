@@ -9,12 +9,15 @@ import br.com.atocf.order.processor.util.DateUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.prometheus.client.Counter;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class OrderConsumer {
@@ -24,11 +27,23 @@ public class OrderConsumer {
     private final ObjectMapper objectMapper;
     private final OrderRepository orderRepository;
     private final RabbitMQConfig rabbitMQConfig;
+    private final RedissonClient redissonClient;
 
-    public OrderConsumer(ObjectMapper objectMapper, OrderRepository orderRepository, RabbitMQConfig rabbitMQConfig) {
+    private final Counter duplicateOrderCounter = Counter.build()
+            .name("duplicate_orders_total")
+            .help("Total de pedidos duplicados detectados.")
+            .register();
+
+    private final Counter errorOrderCounter = Counter.build()
+            .name("error_orders_total")
+            .help("Total de pedidos com erros detectados.")
+            .register();
+
+    public OrderConsumer(ObjectMapper objectMapper, OrderRepository orderRepository, RabbitMQConfig rabbitMQConfig, RedissonClient redissonClient) {
         this.objectMapper = objectMapper;
         this.orderRepository = orderRepository;
         this.rabbitMQConfig = rabbitMQConfig;
+        this.redissonClient = redissonClient;
     }
 
     @RabbitListener(queues = "#{rabbitMQConfig.queueName}")
@@ -36,11 +51,9 @@ public class OrderConsumer {
         try {
             logger.info("Mensagem recebida da fila '{}': {}", rabbitMQConfig.getQueueName(), message);
 
-            // Deserializar a mensagem recebida
             OrderRequest orderRequest = objectMapper.readValue(message, OrderRequest.class);
             logger.info("Pedido deserializado com sucesso: {}", orderRequest);
 
-            // Processar o pedido
             processOrder(orderRequest);
 
         } catch (Exception e) {
@@ -50,19 +63,35 @@ public class OrderConsumer {
     }
 
     private void processOrder(OrderRequest orderRequest) {
-        if (orderRepository.existsByOrderId(orderRequest.getOrderId())) {
-            logger.error("Pedido duplicado detectado: {}", orderRequest.getOrderId());
-            duplicateOrderCounter.inc();
-            return;
+        String lockKey = "order-lock-" + orderRequest.getOrderId();
+        RLock lock = redissonClient.getLock(lockKey);
+        try {
+            if (lock.tryLock(5, 10, TimeUnit.SECONDS)) {
+                try {
+                    if (orderRepository.existsByOrderId(orderRequest.getOrderId())) {
+                        logger.error("Pedido duplicado detectado: {}", orderRequest.getOrderId());
+                        duplicateOrderCounter.inc();
+                        return;
+                    }
+
+                    Order order = mapToOrder(orderRequest);
+                    orderRepository.save(order);
+                    logger.info("Pedido recebido e salvo com sucesso: {}", order.getOrderId());
+
+                    order.calculateTotalValue();
+                    orderRepository.save(order);
+                    logger.info("Pedido calculado e salvo com sucesso: {}", order.getOrderId());
+                } finally {
+                    lock.unlock();
+                }
+            } else {
+                logger.warn("Pedido já está sendo processado por outro pod: {}", orderRequest.getOrderId());
+                duplicateOrderCounter.inc();
+            }
+        } catch (Exception e) {
+            logger.error("Erro ao processar pedido: {}", orderRequest.getOrderId(), e);
+            errorOrderCounter.inc();
         }
-
-        Order order = mapToOrder(orderRequest);
-        orderRepository.save(order);
-        logger.info("Pedido recebido e salvo com sucesso: {}", order.getOrderId());
-
-        order.calculateTotalValue();
-        orderRepository.save(order);
-        logger.info("Pedido calculado e salvo com sucesso: {}", order.getOrderId());
     }
 
     private Order mapToOrder(OrderRequest orderRequest) {
@@ -76,9 +105,4 @@ public class OrderConsumer {
         order.setStatus(OrderStatus.RECEIVED);
         return order;
     }
-
-    private final Counter duplicateOrderCounter = Counter.build()
-            .name("duplicate_orders_total")
-            .help("Total de pedidos duplicados detectados.")
-            .register();
 }
