@@ -147,6 +147,13 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 }
 ```
 
+## Subir ambiente local no Docker
+
+```shell
+   docker-compose up -d
+```
+
+
 ## Subir imagem do docker
 
 ```shell
