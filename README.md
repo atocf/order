@@ -164,5 +164,16 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 
 ## Conectar ao MongoDB:
 ```shell
-   mongosh --host localhost --port 27017 -u admin -p inicial1234
+   mongosh --host localhost --port 27017 -u admin -p inicial1234 order
+```
+- Consultar pedidos:
+```shell
+db.orders.find();
+```
+- Consultar pedidos duplicados:
+```shell
+db.orders.aggregate([
+{ $group: { _id: "$orderId", count: { $sum: 1 } } },
+{ $match: { count: { $gt: 1 } } }
+])
 ```
