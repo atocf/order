@@ -13,10 +13,6 @@ spec:
     metadata:
       labels:
         app: order-processor
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/path: "/actuator/prometheus"
-        prometheus.io/port: "8090"
     spec:
       containers:
         - name: order-processor

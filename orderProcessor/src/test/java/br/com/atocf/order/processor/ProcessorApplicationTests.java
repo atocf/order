@@ -1,17 +1,14 @@
 package br.com.atocf.order.processor;
 
 import org.junit.jupiter.api.Test;
-import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.properties")
 class ProcessorApplicationTests {
-
-	@Autowired
-	private RedissonClient redissonClient;
 
 	@Test
 	void contextLoads() {

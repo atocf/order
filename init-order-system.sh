@@ -54,29 +54,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Passo 3: Configurar Prometheus
-echo -e "${GREEN}Criando namespace para monitoramento...${NC}"
-kubectl create namespace monitoring
-if [ $? -ne 0 ]; then
-  echo -e "${RED}Erro ao criar namespace de monitoramento.${NC}"
-  exit 1
-fi
-
-echo -e "${GREEN}Aplicando Prometheus ConfigMap...${NC}"
-kubectl apply -f prometheus-config.yaml -n monitoring
-if [ $? -ne 0 ]; then
-  echo -e "${RED}Erro ao aplicar o Prometheus ConfigMap.${NC}"
-  exit 1
-fi
-
-echo -e "${GREEN}Aplicando Prometheus deployment...${NC}"
-kubectl apply -f prometheus-deployment.yaml -n monitoring
-if [ $? -ne 0 ]; then
-  echo -e "${RED}Erro ao aplicar o Prometheus deployment.${NC}"
-  exit 1
-fi
-
-# Passo 4: Verificar pods e serviços
+# Passo 3: Verificar pods e serviços
 echo -e "${GREEN}Verificando os pods no cluster...${NC}"
 kubectl get pods -A
 

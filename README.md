@@ -38,6 +38,8 @@ order/
 │   ├── src.test
 │   │   ├── java
 │   │   │   └── br.com.atocf.order.processor
+│   │   │       ├── config
+│   │   │       │   └── TestConfig.java
 │   │   │       ├── dto
 │   │   │       │   └── OrderRequestTests.java
 │   │   │       ├── exception
@@ -48,15 +50,48 @@ order/
 │   │   │       │   ├── OrderStatusTests.java
 │   │   │       │   └── ProductTests.java
 │   │   │       ├── service
-│   │   │       │   └── OrderConsumerTests.java
+│   │   │       │   └── OrderConsumerTests.java - Faltando teste unitário
 │   │   │       ├── util
 │   │   │       │   └── DateUtilsTests.java
-│   │   │       └── ProcessorApplication.java
+│   │   │       └── ProcessorApplication.java - Ajustar devido ao redis
 │   │   └── resources
 │   │       └── application-test.properties
-│   └── Dockerfile
+│   ├── Dockerfile
+│   └── pom.xml
 │      
 ├── orderQuery/
+│   ├── src.main
+│   │   ├── java
+│   │   │  └── br.com.atocf.order.query
+│   │   │       ├── config
+│   │   │       │   ├── MongoConfig.java
+│   │   │       │   └── OpenApiConfig.java
+│   │   │       ├── controller
+│   │   │       │   └── OrderController.java
+│   │   │       ├── dto
+│   │   │       │   └── OrderResponse.java -  Criar para melhor controle do retorno 
+│   │   │       ├── exception
+│   │   │       │   ├── GlobalExceptionHandler.java - Criar para melhor controle de exceções
+│   │   │       │   └── OrderNotFoundException.java - Criar para melhor controle de exceções
+│   │   │       ├── model
+│   │   │       │   ├── Customer.java
+│   │   │       │   ├── Order.java
+│   │   │       │   ├── OrderStatus.java
+│   │   │       │   └── Product.java
+│   │   │       ├── repository
+│   │   │       │   └── OrderRepository.java
+│   │   │       ├── service
+│   │   │       │   └── OrderConsumer.java
+│   │   │       └── QueryApplication.java
+│   │   └── resources
+│   │       └── application.properties
+│   ├── src.test
+│   │   ├── java
+│   │   │   └── br.com.atocf.order.query
+│   │   └── resources
+│   │       └── application-test.properties
+│   ├── Dockerfile
+│   └── pom.xml
 │
 ├── compose.yaml
 ├── init-order-system.sh
@@ -64,9 +99,6 @@ order/
 ├── kind-cluster.yaml
 ├── mongodb-deployment.yaml
 ├── order-deployment.yaml
-├── prometheus.yml
-├── prometheus-config.yaml
-├── prometheus-deployment.yaml
 ├── rabbitmq-deployment.yaml
 ├── testeCarga.py
 ├── redis-deployment.yaml
@@ -150,10 +182,16 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
        mvn clean package -DskipTests
 ```
 ```shell
+    cd .\orderQuery\ 
+```
+```shell
+       mvn clean package -DskipTests
+```
+```shell
    docker-compose build
 ```
 
-## Subir ambiente local no Docker
+## Subir ambiente local no Dock
 ```shell
    docker-compose up -d
 ```
@@ -178,14 +216,6 @@ docker push atocf/order-processor:latest
 
 ```shell
    .\init-order-system.bat
-```
-
-### Acessar o Prometheus:
-```shell
-   kubectl port-forward service/prometheus -n monitoring 9090:9090
-```
-```shell
-   http://localhost:9090
 ```
 
 ### Acessar o RabbitMQ:

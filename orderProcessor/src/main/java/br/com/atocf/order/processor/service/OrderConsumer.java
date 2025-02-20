@@ -6,7 +6,6 @@ import br.com.atocf.order.processor.model.Order;
 import br.com.atocf.order.processor.util.DateUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.prometheus.client.Counter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
@@ -33,16 +32,6 @@ public class OrderConsumer {
     private final RedissonClient redissonClient;
     private final MongoTemplate mongoTemplate;
 
-    private final Counter duplicateOrderCounter = Counter.build()
-            .name("duplicate_orders_total")
-            .help("Total de pedidos duplicados detectados.")
-            .register();
-
-    private final Counter errorOrderCounter = Counter.build()
-            .name("error_orders_total")
-            .help("Total de pedidos com erros detectados.")
-            .register();
-
     public OrderConsumer(ObjectMapper objectMapper, RabbitMQConfig rabbitMQConfig,
                          RedissonClient redissonClient, MongoTemplate mongoTemplate) {
         this.objectMapper = objectMapper;
@@ -63,10 +52,8 @@ public class OrderConsumer {
 
         } catch (JsonProcessingException e) {
             logger.error("Erro ao deserializar mensagem: {}", message, e);
-            errorOrderCounter.inc();
         } catch (Exception e) {
             logger.error("Erro inesperado ao processar mensagem: {}", message, e);
-            errorOrderCounter.inc();
         }
     }
 
@@ -86,19 +73,15 @@ public class OrderConsumer {
                     logger.info("Pedido processado com sucesso: {}", orderRequest.getOrderId());
                 } else {
                     logger.warn("Pedido duplicado detectado: {}", orderRequest.getOrderId());
-                    duplicateOrderCounter.inc();
                 }
             } else {
                 logger.warn("Pedido já está sendo processado por outro pod: {}", orderRequest.getOrderId());
-                duplicateOrderCounter.inc();
             }
         } catch (InterruptedException e) {
             logger.error("Erro ao tentar adquirir o bloqueio para o pedido: {}", orderRequest.getOrderId(), e);
-            errorOrderCounter.inc();
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             logger.error("Erro inesperado ao processar pedido: {}", orderRequest.getOrderId(), e);
-            errorOrderCounter.inc();
         } finally {
             if (isLockAcquired) {
                 lock.unlock();
@@ -120,6 +103,7 @@ public class OrderConsumer {
                             .setOnInsert("createdAt", order.getCreatedAt())
                             .setOnInsert("entryAt", order.getEntryAt())
                             .setOnInsert("updatedAt", order.getUpdatedAt())
+                            .setOnInsert("totalValue", order.getTotalValue())
                             .setOnInsert("status", order.getStatus()),
                     FindAndModifyOptions.options().upsert(true).returnNew(false),
                     Order.class
@@ -128,7 +112,6 @@ public class OrderConsumer {
             return existingOrder == null;
         } catch (Exception e) {
             logger.warn("Erro ao tentar inserir o pedido no banco: {}", orderRequest.getOrderId(), e);
-            duplicateOrderCounter.inc();
             return false;
         }
     }
