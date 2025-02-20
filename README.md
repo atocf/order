@@ -182,6 +182,12 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
        mvn clean package -DskipTests
 ```
 ```shell
+    cd .\orderQuery\ 
+```
+```shell
+       mvn clean package -DskipTests
+```
+```shell
    docker-compose build
 ```
 

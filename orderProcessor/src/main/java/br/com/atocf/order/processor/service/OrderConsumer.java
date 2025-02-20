@@ -103,6 +103,7 @@ public class OrderConsumer {
                             .setOnInsert("createdAt", order.getCreatedAt())
                             .setOnInsert("entryAt", order.getEntryAt())
                             .setOnInsert("updatedAt", order.getUpdatedAt())
+                            .setOnInsert("totalValue", order.getTotalValue())
                             .setOnInsert("status", order.getStatus()),
                     FindAndModifyOptions.options().upsert(true).returnNew(false),
                     Order.class
