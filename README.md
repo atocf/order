@@ -172,12 +172,12 @@ docker push atocf/order-processor:latest
 ## Execução no linux 
 
 ```shell
-   init-order-system.sh
+   .\init-order-system.sh
 ```
 ## Execução no windows (Validado no Windows 11)
 
 ```shell
-   init-order-system.bat
+   .\init-order-system.bat
 ```
 
 ### Acessar o Prometheus:
@@ -234,9 +234,6 @@ db.orders.deleteMany({});
    kubectl port-forward service/rabbitmq-service 5672:5672
 ```
 - Teste de carga
-```shell
-  pip install pika
-```
 ```shell
 python testeCarga.py
 ```
