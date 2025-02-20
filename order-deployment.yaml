@@ -5,7 +5,7 @@ metadata:
   labels:
     app: order-processor
 spec:
-  replicas: 3
+  replicas: 10
   selector:
     matchLabels:
       app: order-processor

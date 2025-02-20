@@ -64,6 +64,8 @@ order/
 ├── orderQuery/
 │
 ├── compose.yaml
+├── init-order-system.sh
+├── init-order-system.bat
 ├── kind-cluster.yaml
 ├── mongodb-deployment.yaml
 ├── order-deployment.yaml
@@ -119,85 +121,7 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 - Consulta de Dados (Produto Externo B → OrderQuery):
   - O Produto Externo B realiza consultas aos pedidos processados através dos endpoints REST do serviço OrderQuery.
 
-
-## Execução
-
-### Executar local com Docker Compose:
-```shell
-   docker-compose up -d
-```
-
-### Executar local com Kind:
-- Crie o cluster Kind:
-```shell
-   kind create cluster --config kind-cluster.yaml
-```
-- Verifique se o cluster foi criado:
-```shell
-   kubectl get nodes
-```
-- Crie os deployments e service:
-```shell
-   kubectl apply -f mongodb-deployment.yaml
-```   
-```shell
-   kubectl apply -f rabbitmq-deployment.yaml
-```
-```shell
-   kubectl apply -f order-deployment.yaml
-```
-- Prometeus
-```shell
-   kubectl create namespace monitoring
-```
-```shell
-   kubectl apply -f prometheus-config.yaml
-```
-```shell
-   kubectl apply -f prometheus-deployment.yaml
-```
-```shell
-  kubectl apply -f redis-deployment.yaml
-```
-- Verifique se os pods foram criados:
-```shell
-   kubectl get pods
-```
-- Verifique os serviços:
-```shell
-   kubectl get services
-```
-
-### Acessar o Prometheus:
-```shell
-   kubectl port-forward service/prometheus-service 9090:9090
-```
-```shell
-   http://localhost:9090
-```
-
-### Acessar o RabbitMQ:
-- Acesse o RabbitMQ no navegador:
-```shell
-   kubectl port-forward service/rabbitmq-service 15672:15672
-```
-- Usuário: admin
-- Senha: inicial1234
-```shell
-   http://localhost:15672
-```
-- Acesse o RabbitMQ no terminal e liberar para teste de carga:
-```shell
-   kubectl port-forward service/rabbitmq-service 5672:5672
-```
-- Teste de carga
-```shell
-  pip install pika
-```
-```shell
-python testeCarga.py
-```
-- Modelo de dados 
+## Modelo de dados 
 ```
 {
   "orderId": "ORD123456",
@@ -223,6 +147,51 @@ python testeCarga.py
 }
 ```
 
+## Subir imagem do docker
+
+```shell
+   docker-compose build
+```
+```shell
+docker login
+```
+```shell
+docker tag order-processor:latest {user}/order-processor:latest
+```
+```shell
+docker push {user}/order-processor:latest
+```
+
+## Execução no linux 
+
+```shell
+   init-order-system.sh
+```
+## Execução no windows (Validado no Windows 11)
+
+```shell
+   init-order-system.bat
+```
+
+### Acessar o Prometheus:
+```shell
+   kubectl port-forward service/prometheus -n monitoring 9090:9090
+```
+```shell
+   http://localhost:9090
+```
+
+### Acessar o RabbitMQ:
+- Acesse o RabbitMQ no navegador:
+```shell
+   kubectl port-forward service/rabbitmq-service 15672:15672
+```
+- Usuário: admin
+- Senha: inicial1234
+```shell
+   http://localhost:15672
+```
+
 ### Acessar o MongoDB:
 ```shell
    kubectl port-forward service/mongodb-service 27017:27017
@@ -230,7 +199,11 @@ python testeCarga.py
 
 - Conectar ao MongoDB:
 ```shell
-   mongosh --host localhost --port 27017 -u admin -p inicial1234 order
+   mongosh --host localhost --port 27017 -u admin -p inicial1234 
+```
+- Selecionar o banco de dados:
+```shell
+  use order;
 ```
 - Consultar pedidos:
 ```shell
@@ -238,10 +211,7 @@ db.orders.find();
 ```
 - Consultar pedidos duplicados:
 ```shell
-db.orders.aggregate([
-{ $group: { _id: "$orderId", count: { $sum: 1 } } },
-{ $match: { count: { $gt: 1 } } }
-])
+db.orders.aggregate([{ $group: { _id: "$orderId", count: { $sum: 1 } } },{ $match: { count: { $gt: 1 } } }]);
 ```
 - Consultar qtd de pedido:
 ```shell
@@ -250,4 +220,16 @@ db.orders.countDocuments();
 - Limpar pedidos:
 ```shell
 db.orders.deleteMany({});
+```
+
+### Acesse o RabbitMQ no terminal e liberar para teste de carga:
+```shell
+   kubectl port-forward service/rabbitmq-service 5672:5672
+```
+- Teste de carga
+```shell
+  pip install pika
+```
+```shell
+python testeCarga.py
 ```
