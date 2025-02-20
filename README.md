@@ -38,6 +38,8 @@ order/
 │   ├── src.test
 │   │   ├── java
 │   │   │   └── br.com.atocf.order.processor
+│   │   │       ├── config
+│   │   │       │   └── TestConfig.java
 │   │   │       ├── dto
 │   │   │       │   └── OrderRequestTests.java
 │   │   │       ├── exception
@@ -48,15 +50,48 @@ order/
 │   │   │       │   ├── OrderStatusTests.java
 │   │   │       │   └── ProductTests.java
 │   │   │       ├── service
-│   │   │       │   └── OrderConsumerTests.java
+│   │   │       │   └── OrderConsumerTests.java - Faltando teste unitário
 │   │   │       ├── util
 │   │   │       │   └── DateUtilsTests.java
-│   │   │       └── ProcessorApplication.java
+│   │   │       └── ProcessorApplication.java - Ajustar devido ao redis
 │   │   └── resources
 │   │       └── application-test.properties
-│   └── Dockerfile
+│   ├── Dockerfile
+│   └── pom.xml
 │      
 ├── orderQuery/
+│   ├── src.main
+│   │   ├── java
+│   │   │  └── br.com.atocf.order.query
+│   │   │       ├── config
+│   │   │       │   ├── MongoConfig.java
+│   │   │       │   └── OpenApiConfig.java
+│   │   │       ├── controller
+│   │   │       │   └── OrderController.java
+│   │   │       ├── dto
+│   │   │       │   └── OrderResponse.java -  Criar para melhor controle do retorno 
+│   │   │       ├── exception
+│   │   │       │   ├── GlobalExceptionHandler.java - Criar para melhor controle de exceções
+│   │   │       │   └── OrderNotFoundException.java - Criar para melhor controle de exceções
+│   │   │       ├── model
+│   │   │       │   ├── Customer.java
+│   │   │       │   ├── Order.java
+│   │   │       │   ├── OrderStatus.java
+│   │   │       │   └── Product.java
+│   │   │       ├── repository
+│   │   │       │   └── OrderRepository.java
+│   │   │       ├── service
+│   │   │       │   └── OrderConsumer.java
+│   │   │       └── QueryApplication.java
+│   │   └── resources
+│   │       └── application.properties
+│   ├── src.test
+│   │   ├── java
+│   │   │   └── br.com.atocf.order.query
+│   │   └── resources
+│   │       └── application-test.properties
+│   ├── Dockerfile
+│   └── pom.xml
 │
 ├── compose.yaml
 ├── init-order-system.sh
