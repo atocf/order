@@ -67,6 +67,9 @@ order/
 ├── kind-cluster.yaml
 ├── mongodb-deployment.yaml
 ├── order-deployment.yaml
+├── prometheus.yml
+├── prometheus-config.yaml
+├── prometheus-deployment.yaml
 ├── rabbitmq-deployment.yaml
 ├── testeCarga.py
 └── README.md
@@ -120,7 +123,7 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 
 ### Executar local com Docker Compose:
 ```shell
-   docker-compose up
+   docker-compose up -d
 ```
 
 ### Executar local com Kind:
@@ -142,6 +145,16 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 ```shell
    kubectl apply -f order-deployment.yaml
 ```
+- Prometeus
+```shell
+   kubectl create namespace monitoring
+```
+```shell
+   kubectl apply -f prometheus-config.yaml
+```
+```shell
+   kubectl apply -f prometheus-deployment.yaml
+```
 - Verifique se os pods foram criados:
 ```shell
    kubectl get pods
@@ -149,6 +162,14 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 - Verifique os serviços:
 ```shell
    kubectl get services
+```
+
+### Acessar o Prometheus:
+```shell
+   kubectl port-forward service/prometheus-service 9090:9090
+```
+```shell
+   http://localhost:9090
 ```
 
 ### Acessar o RabbitMQ:

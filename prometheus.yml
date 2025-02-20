@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s # Intervalo para coletar métricas
+
+scrape_configs:
+  - job_name: 'order-processor'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['order-processor:8090']
+
+  - job_name: 'rabbitmq'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['rabbitmq:15672']
+
+  - job_name: 'mongodb'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['mongodb:27017']
