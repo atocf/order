@@ -17,19 +17,17 @@ order/
 │   │   │  └── br.com.atocf.order.processor
 │   │   │       ├── config
 │   │   │       │   ├── MongoConfig.java
+│   │   │       │   ├── RedissonConfig
 │   │   │       │   └── RabbitMQConfig.java
 │   │   │       ├── dto
 │   │   │       │   └── OrderRequest.java
 │   │   │       ├── exception
-│   │   │       │   ├── DuplicateOrderException.java
 │   │   │       │   └── OrderNotFoundException.java
 │   │   │       ├── model
 │   │   │       │   ├── Customer.java
 │   │   │       │   ├── Order.java
 │   │   │       │   ├── OrderStatus.java
 │   │   │       │   └── Product.java
-│   │   │       ├── repository
-│   │   │       │   └── OrderRepository.java
 │   │   │       ├── service
 │   │   │       │   └── OrderConsumer.java
 │   │   │       ├── util
@@ -43,15 +41,12 @@ order/
 │   │   │       ├── dto
 │   │   │       │   └── OrderRequestTests.java
 │   │   │       ├── exception
-│   │   │       │   ├── DuplicateOrderExceptionTests.java
 │   │   │       │   └── OrderNotFoundExceptionTest.java
 │   │   │       ├── model
 │   │   │       │   ├── CustomerTests.java
 │   │   │       │   ├── OrderTests.java
 │   │   │       │   ├── OrderStatusTests.java
 │   │   │       │   └── ProductTests.java
-│   │   │       ├── repository
-│   │   │       │   └── OrderRepositoryTests.java
 │   │   │       ├── service
 │   │   │       │   └── OrderConsumerTests.java
 │   │   │       ├── util
@@ -147,26 +142,31 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 }
 ```
 
-## Subir ambiente local no Docker
+## Compilar projeto
+```shell
+    cd .\orderProcessor\ 
+```
+```shell
+       mvn clean package -DskipTests
+```
+```shell
+   docker-compose build
+```
 
+## Subir ambiente local no Docker
 ```shell
    docker-compose up -d
 ```
 
-
 ## Subir imagem do docker
-
-```shell
-   docker-compose build
-```
 ```shell
 docker login
 ```
 ```shell
-docker tag order-processor:latest {user}/order-processor:latest
+docker tag order-processor:latest atocf/order-processor:latest
 ```
 ```shell
-docker push {user}/order-processor:latest
+docker push atocf/order-processor:latest
 ```
 
 ## Execução no linux 
