@@ -64,6 +64,11 @@ order/
 ├── orderQuery/
 │
 ├── compose.yaml
+├── kind-cluster.yaml
+├── mongodb-deployment.yaml
+├── order-deployment.yaml
+├── rabbitmq-deployment.yaml
+├── testeCarga.py
 └── README.md
 
 ## Serviço

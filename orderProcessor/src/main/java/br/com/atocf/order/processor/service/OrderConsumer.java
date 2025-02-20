@@ -2,13 +2,13 @@ package br.com.atocf.order.processor.service;
 
 import br.com.atocf.order.processor.config.RabbitMQConfig;
 import br.com.atocf.order.processor.dto.OrderRequest;
-import br.com.atocf.order.processor.exception.DuplicateOrderException;
 import br.com.atocf.order.processor.model.Order;
 import br.com.atocf.order.processor.model.OrderStatus;
 import br.com.atocf.order.processor.repository.OrderRepository;
 import br.com.atocf.order.processor.util.DateUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.prometheus.client.Counter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -51,7 +51,9 @@ public class OrderConsumer {
 
     private void processOrder(OrderRequest orderRequest) {
         if (orderRepository.existsByOrderId(orderRequest.getOrderId())) {
-            throw new DuplicateOrderException("Pedido duplicado detectado: " + orderRequest.getOrderId());
+            logger.error("Pedido duplicado detectado: {}", orderRequest.getOrderId());
+            duplicateOrderCounter.inc();
+            return;
         }
 
         Order order = mapToOrder(orderRequest);
@@ -74,4 +76,9 @@ public class OrderConsumer {
         order.setStatus(OrderStatus.RECEIVED);
         return order;
     }
+
+    private final Counter duplicateOrderCounter = Counter.build()
+            .name("duplicate_orders_total")
+            .help("Total de pedidos duplicados detectados.")
+            .register();
 }
