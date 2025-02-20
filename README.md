@@ -99,9 +99,6 @@ order/
 ├── kind-cluster.yaml
 ├── mongodb-deployment.yaml
 ├── order-deployment.yaml
-├── prometheus.yml
-├── prometheus-config.yaml
-├── prometheus-deployment.yaml
 ├── rabbitmq-deployment.yaml
 ├── testeCarga.py
 ├── redis-deployment.yaml
@@ -188,7 +185,7 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
    docker-compose build
 ```
 
-## Subir ambiente local no Docker
+## Subir ambiente local no Dock
 ```shell
    docker-compose up -d
 ```
@@ -213,14 +210,6 @@ docker push atocf/order-processor:latest
 
 ```shell
    .\init-order-system.bat
-```
-
-### Acessar o Prometheus:
-```shell
-   kubectl port-forward service/prometheus -n monitoring 9090:9090
-```
-```shell
-   http://localhost:9090
 ```
 
 ### Acessar o RabbitMQ:

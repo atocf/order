@@ -54,29 +54,7 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-:: Passo 3: Configurar Prometheus
-%GREEN% Criando namespace para monitoramento...
-kubectl create namespace monitoring
-if %ERRORLEVEL% NEQ 0 (
-    %RED% Erro ao criar namespace de monitoramento.
-    exit /b 1
-)
-
-%GREEN% Aplicando Prometheus ConfigMap...
-kubectl apply -f prometheus-config.yaml -n monitoring
-if %ERRORLEVEL% NEQ 0 (
-    %RED% Erro ao aplicar o Prometheus ConfigMap.
-    exit /b 1
-)
-
-%GREEN% Aplicando Prometheus deployment...
-kubectl apply -f prometheus-deployment.yaml -n monitoring
-if %ERRORLEVEL% NEQ 0 (
-    %RED% Erro ao aplicar o Prometheus deployment.
-    exit /b 1
-)
-
-:: Passo 4: Verificar pods e serviços
+:: Passo 3: Verificar pods e serviços
 %GREEN% Verificando os pods no cluster...
 kubectl get pods -A
 
