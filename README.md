@@ -4,8 +4,9 @@ O sistema foi projetado para gerenciar pedidos recebidos de um Produto Externo A
 
 ## Pré-requisitos
 - Docker
-- Docker Compose  orderProcessor
+- Docker Compose
 - Kind
+- mongosh - https://www.mongodb.com/try/download/shell
 
 ## Estrutura de Pastas do Projeto
 order/
@@ -112,22 +113,21 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 
 ## Execução
 
-### Build dos serviços:
+### Executar local com Docker Compose:
 ```shell
-   docker-compose build
+   docker-compose up
 ```
 
-### Crie o cluster:
+### Executar local com Kind:
+- Crie o cluster Kind:
 ```shell
    kind create cluster --config kind-cluster.yaml
 ```
-
-### Verifique se o cluster foi criado:
+- Verifique se o cluster foi criado:
 ```shell
    kubectl get nodes
 ```
-
-### Deploy dos serviços:
+- Crie os deployments e service:
 ```shell
    kubectl apply -f mongodb-deployment.yaml
 ```   
@@ -137,13 +137,32 @@ Optei por criar dois serviços distintos, OrderProcessor e OrderQuery, para sepa
 ```shell
    kubectl apply -f order-deployment.yaml
 ```
-
-### Verifique se os pods foram criados:
+- Verifique se os pods foram criados:
 ```shell
    kubectl get pods
 ```
-
-### Verifique os serviços:
+- Verifique os serviços:
 ```shell
    kubectl get services
+```
+- Acessar o RabbitMQ:
+```shell
+   kubectl port-forward service/rabbitmq-service 15672:15672
+```
+
+
+
+
+
+
+
+
+## Acessar o MongoDB:
+```shell
+   kubectl port-forward service/mongodb-service 27017:27017
+```
+
+## Conectar ao MongoDB:
+```shell
+   mongosh --host localhost --port 27017 -u admin -p inicial1234
 ```

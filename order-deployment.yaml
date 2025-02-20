@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order
+  name: order-processor
   labels:
-    app: order
+    app: order-processor
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: order
+      app: order-processor
   template:
     metadata:
       labels:
-        app: order
+        app: order-processor
     spec:
       containers:
-        - name: order
-          image: order-processor:latest
+        - name: order-processor
+          image: atocf/order-processor:latest
           ports:
             - containerPort: 8090
           env:
@@ -45,14 +45,26 @@ spec:
             limits:
               memory: "1024Mi"
               cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8090
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8090
+            initialDelaySeconds: 30
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: order-service
+  name: order-processor-service
 spec:
   selector:
-    app: order
+    app: order-processor
   ports:
     - protocol: TCP
       port: 8090
